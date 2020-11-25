@@ -14,9 +14,9 @@ namespace ConsoleApp.Models
             _htmlNode = htmlNode;
         }
 
-        public string Status => _htmlNode.QuerySelector("div.list-card-type").InnerText;
-        public string Price => _htmlNode.QuerySelector("div.list-card-price").InnerText;
-        public string Address => _htmlNode.QuerySelector("div.list-card-info address").InnerText;
-        public string Link => _htmlNode.QuerySelector("div.list-card-info a").GetAttributeValue("href", null);
+        public string Status => _htmlNode?.QuerySelector("div.list-card-type")?.InnerText;
+        public string Price => _htmlNode?.QuerySelector("div.list-card-price")?.InnerText;
+        public string Address => _htmlNode?.QuerySelector("div.list-card-info address")?.InnerText.Replace(",", string.Empty);
+        public string Link => _htmlNode?.QuerySelector("div.list-card-info a")?.GetAttributeValue("href", null);
     }
 }

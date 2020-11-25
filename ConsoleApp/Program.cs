@@ -37,7 +37,15 @@ namespace ConsoleApp
             sb.AppendLine("Status,Address,Price,Link");
             foreach (var sr in zillowSearchResults)
             {
-                sb.AppendLine(string.Format("{0},{1},{2},{3}", sr.Status, sr.Address, sr.Price, sr.Link));
+                try
+                {
+                    sb.AppendLine(string.Format("{0},{1},{2},{3}", sr.Status, sr.Address, sr.Price, sr.Link));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                
             }
 
             using (StreamWriter sw = File.CreateText(Path))
