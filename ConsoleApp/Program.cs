@@ -10,8 +10,8 @@ namespace ConsoleApp
 {
     public sealed class Program
     {
-        private static Uri BaseUri = new Uri("https://www.zillow.com");
-        private static string Path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "DataDump.csv");
+        private static readonly string BaseUri = "https://www.zillow.com";
+        private static readonly string Path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "DataDump.csv");
         public static void Main(string[] args)
         {
             var searchLink = new Uri("https://www.zillow.com/homes/77459_rb/");
@@ -23,9 +23,10 @@ namespace ConsoleApp
             {
                 var page = new Page(searchLink);
                 zillowPages.Add(page);
-                searchLink = new Uri(BaseUri.AbsoluteUri + page.NextPage);
+                searchLink = new Uri(BaseUri + page.NextPage);
             }
-            while (!string.IsNullOrWhiteSpace(zillowPages.Last().NextPage));
+            while (!string.IsNullOrWhiteSpace(zillowPages.Last().NextPage) && zillowPages.Last().NextPage != zillowPages.Last().CurrentPageUrl.AbsolutePath);
+            
 
             Console.WriteLine("Fetched {0} Zillow Pages", zillowPages.Count());
 
