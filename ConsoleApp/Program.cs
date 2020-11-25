@@ -33,10 +33,11 @@ namespace ConsoleApp
 
             Console.WriteLine("Creating CSV for {0} Zillow Search Results", zillowSearchResults.Count());
 
-            var sb = new StringBuilder();            
+            var sb = new StringBuilder();
+            sb.AppendLine("Status,Address,Price,Link");
             foreach (var sr in zillowSearchResults)
             {
-                sb.AppendLine(string.Format("{0},{1},{2},{3},{4},{5}", sr.Status, sr.Address, sr.Price, sr.Price, sr.Link));
+                sb.AppendLine(string.Format("{0},{1},{2},{3}", sr.Status, sr.Address, sr.Price, sr.Link));
             }
 
             using (StreamWriter sw = File.CreateText(Path))
