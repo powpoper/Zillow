@@ -40,11 +40,11 @@ namespace ConsoleApp
             while (!string.IsNullOrWhiteSpace(zillowPages.Last().NextPage) && zillowPages.Last().NextPage != zillowPages.Last().CurrentPageUrl.AbsolutePath);
 
 
-            _logger.LogInformation("Fetched {0} Zillow Pages", zillowPages.Count());
+            _logger.LogInformation("Fetched {ZillowPageCount} Zillow Pages", zillowPages.Count());
 
             var zillowSearchResults = zillowPages.SelectMany(x => x.SearchResults);
 
-            _logger.LogInformation("Creating CSV for {0} Zillow Search Results", zillowSearchResults.Count());
+            _logger.LogInformation("Creating CSV for {ZillowSearchResultsCount} Zillow Search Results", zillowSearchResults.Count());
 
             var sb = new StringBuilder();
             sb.AppendLine("Status,Address,Price,Link");
