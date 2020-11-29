@@ -1,60 +1,48 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using System.Reflection;
-using ConsoleApp.Models;
-using System.Collections.Generic;
-using System.Linq;
+using Serilog;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ConsoleApp
 {
-    public sealed class Program
+    internal sealed class Program
     {
-        private static readonly string BaseUri = "https://www.zillow.com";
-        private static readonly string Path = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "DataDump.csv");
         public static void Main(string[] args)
         {
-            var searchLink = new Uri("https://www.zillow.com/homes/77459_rb/");
-            var zillowPages = new List<Page>();
+            var builder = new ConfigurationBuilder();
+            BuildConfig(builder);
 
-            Console.WriteLine("Fetching Zillow Pages");
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Build())
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
 
-            do
-            {
-                var page = new Page(searchLink);
-                zillowPages.Add(page);
-                searchLink = new Uri(BaseUri + page.NextPage);
-            }
-            while (!string.IsNullOrWhiteSpace(zillowPages.Last().NextPage) && zillowPages.Last().NextPage != zillowPages.Last().CurrentPageUrl.AbsolutePath);
-            
+            Log.Logger.Information("Application Starting");
 
-            Console.WriteLine("Fetched {0} Zillow Pages", zillowPages.Count());
-
-            var zillowSearchResults = zillowPages.SelectMany(x => x.SearchResults);
-
-            Console.WriteLine("Creating CSV for {0} Zillow Search Results", zillowSearchResults.Count());
-
-            var sb = new StringBuilder();
-            sb.AppendLine("Status,Address,Price,Link");
-            foreach (var sr in zillowSearchResults)
-            {
-                try
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
                 {
-                    sb.AppendLine(string.Format("{0},{1},{2},{3}", sr.Status, sr.Address, sr.Price, sr.Link));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-                
-            }
+                    services.AddTransient<Startup>();
+                })
+                .UseSerilog()
+                .Build();
 
-            using (StreamWriter sw = File.CreateText(Path))
-            {
-                sw.WriteLine(sb.ToString());
-            }
+            var svc = ActivatorUtilities.CreateInstance<Startup>(host.Services);
+            svc.Run();
 
-            Console.WriteLine("Finished.");
+            Console.WriteLine("Press any key to close this window...");
+            Console.ReadKey();
+        }
+
+        static void BuildConfig (IConfigurationBuilder builder)
+        {
+            builder.SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+                .AddEnvironmentVariables();
         }
     }
 }
